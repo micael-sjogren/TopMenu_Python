@@ -59,7 +59,7 @@ class Form1(tk.Tk):
         self.textColorInactive = get_color(settings.get('textColor_Inactive', "#AAAAAA"))
 
     def open_item(self, item_path):
-        try:
+        try: 
             # Check the file extension
             _, ext = os.path.splitext(item_path)
 
@@ -76,10 +76,11 @@ class Form1(tk.Tk):
                 # Run Python scripts using Python interpreter
                 subprocess.Popen(['python', item_path], shell=True)
             else:
-                # Handle unsupported file types
-                messagebox.showerror("Error", f"Unsupported file type: {ext}")
+                # Open other file types with their default application
+                os.startfile(item_path)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to open file: {e}")
+
 
     def open_folder(self, folder_path):
         try:
