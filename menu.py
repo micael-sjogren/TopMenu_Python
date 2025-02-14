@@ -25,6 +25,7 @@ class Form1(tk.Tk):
         self.menu_bar = MenuBar(self)
         self.menu_bar.pack(fill='x')
 
+        # Populate the menu after the menu bar is created
         self.populate_menu()
 
     def load_config(self):
@@ -57,26 +58,6 @@ class Form1(tk.Tk):
         self.borderColor = get_color(settings.get('borderColor', "#FFFF00"))
         self.textColorInactive = get_color(settings.get('textColor_Inactive', "#AAAAAA"))
 
-    def populate_menu(self):
-        items = sorted(os.listdir(self.rootFolder), key=natural_sort_key)
-
-        for item in items:
-            item_path = os.path.join(self.rootFolder, item)
-            
-            # Hide file extensions
-            item_name, ext = os.path.splitext(item)
-
-            # Remove the first five characters for display
-            item_name = item_name[5:] 
-            
-            # Use a different text color if it's inactive (example logic)
-            text_color = self.textColor if os.path.isfile(item_path) else self.textColorInactive
-            
-            if os.path.isfile(item_path):
-                self.menu_bar.add_menu_item(item_name, lambda p=item_path: self.open_item(p), text_color)
-            elif os.path.isdir(item_path):
-                self.menu_bar.add_folder_item(f"[{item_name}]", item_path)
-
     def open_item(self, item_path):
         try:
             # Check the file extension
@@ -100,12 +81,34 @@ class Form1(tk.Tk):
         except Exception as e:
             messagebox.showerror("Error", f"Failed to open file: {e}")
 
-
     def open_folder(self, folder_path):
         try:
             os.startfile(folder_path)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to open folder: {e}")
+
+    def populate_menu(self):
+        items = sorted(os.listdir(self.rootFolder), key=natural_sort_key)
+        print("Populating menu with items:")
+
+        for item in items:
+            item_path = os.path.join(self.rootFolder, item)
+
+            # Check if the item starts with "9"
+            if item.startswith("9"):
+                print(f"Skipping {item} because it starts with '9'")
+                continue
+
+            # Process file name and remove the first 5 characters
+            item_name, ext = os.path.splitext(item)
+            item_name = item_name[5:]  # Remove the first five characters for display
+
+            print(f"Adding {item_name} to menu")
+
+            if os.path.isfile(item_path):
+                self.menu_bar.add_menu_item(item_name, lambda p=item_path: self.open_item(p), self.textColor)
+            elif os.path.isdir(item_path):
+                self.menu_bar.add_folder_item(f"[{item_name}]", item_path)
 
 class MenuBar(tk.Frame):
     def __init__(self, master=None):
@@ -152,7 +155,11 @@ class MenuBar(tk.Frame):
             item_name, ext = os.path.splitext(item)
 
             # Remove the first five characters for display
-            item_name = item_name[5:]  
+            item_name = item_name[5:]
+
+            # Skip the item if it starts with a "9"
+            if item_name.startswith("9"):
+                continue
 
             if os.path.isdir(item_path):
                 menu.add_command(label=f"[{item_name}]", command=lambda p=item_path: self.master.open_folder(p))
