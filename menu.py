@@ -158,12 +158,15 @@ class MenuBar(tk.Frame):
             # Remove the first five characters for display
             item_name = item_name[5:]
 
-            # Skip the item if it starts with a "9"
-            if item_name.startswith("9"):
+            # Skip items starting with "9"
+            if item.startswith("9"):
                 continue
 
             if os.path.isdir(item_path):
-                menu.add_command(label=f"[{item_name}]", command=lambda p=item_path: self.master.open_folder(p))
+                # Create a submenu for subfolders
+                submenu = tk.Menu(menu, tearoff=0, background=self.master.menuBarColor, foreground=self.master.textColor)
+                self._populate_folder_menu(submenu, item_path)  # Recursively populate
+                menu.add_cascade(label=f"[{item_name}]", menu=submenu)
             elif os.path.isfile(item_path):
                 menu.add_command(label=item_name, command=lambda p=item_path: self.master.open_item(p))
 
